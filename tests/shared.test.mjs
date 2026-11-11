@@ -116,6 +116,14 @@ test("authentication reports incomplete account configuration", () => {
     () => requireAuth(request, { ADMIN_USERNAME: "admin", ADMIN_PASSWORD: "password", STAFF_USERNAME: "staff" }),
     error => error instanceof HttpError && error.status === 503,
   );
+  assert.throws(
+    () => requireAuth(request, { ADMIN_PASSWORD: "password" }),
+    error => error instanceof HttpError && error.status === 503 && error.message === "Falta configurar ADMIN_USERNAME.",
+  );
+  assert.throws(
+    () => requireAuth(request, { ADMIN_USERNAME: "admin" }),
+    error => error instanceof HttpError && error.status === 503 && error.message === "Falta configurar ADMIN_PASSWORD.",
+  );
 });
 
 test("staff can read sales reports including estimated gross profit", async () => {

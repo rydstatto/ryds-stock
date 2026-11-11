@@ -46,9 +46,8 @@ export function requireAuth(request, env) {
   const adminPassword = env.ADMIN_PASSWORD;
   const staffUsername = env.STAFF_USERNAME || "";
   const staffPassword = env.STAFF_PASSWORD || "";
-  if (!adminUsername || !adminPassword) {
-    throw new HttpError(503, "La cuenta de administración no está configurada.");
-  }
+  if (!adminUsername) throw new HttpError(503, "Falta configurar ADMIN_USERNAME.");
+  if (!adminPassword) throw new HttpError(503, "Falta configurar ADMIN_PASSWORD.");
   if (Boolean(staffUsername) !== Boolean(staffPassword)) {
     throw new HttpError(503, "La cuenta de vendedor no está configurada correctamente.");
   }
