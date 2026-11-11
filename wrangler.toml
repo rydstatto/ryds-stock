@@ -1,0 +1,12 @@
+name = "ryds-stock"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-11-11"
+
+[vars]
+ADMIN_USERNAME = "ryds"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "agenda-facil-demo"
+database_id = "d4b0cbe5-011b-4ba9-8f57-68c49139d951"
+migrations_dir = "migrations"

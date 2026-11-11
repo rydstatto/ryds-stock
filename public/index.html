@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071322">
+  <meta name="description" content="Ryds Stock: demo de inventario y ventas para pequeños negocios. Usa datos de demostración.">
+  <title>Ryds Stock | Inventario y ventas</title>
+  <link rel="icon" type="image/webp" href="assets/ryds-mark.webp">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="login-screen" id="login-screen">
+    <form class="login-card" id="login-form">
+      <img class="login-logo" src="assets/ryds-mark.webp" alt="">
+      <p class="eyebrow">Demo de gestión</p>
+      <h1>Ryds Stock</h1>
+      <p class="login-description">Inventario y ventas para pequeños negocios.</p>
+      <label for="login-username">Usuario</label>
+      <input id="login-username" name="username" autocomplete="username" value="ryds" required>
+      <label for="login-password">Contraseña de demostración</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      <button class="button button-primary full-width" type="submit" id="login-button">Entrar al panel</button>
+      <p class="form-message" id="login-message" role="status" aria-live="polite"></p>
+      <p class="demo-note">Este panel usa datos ficticios. No registres datos reales ni compartas credenciales.</p>
+    </form>
+  </div>
+
+  <div class="app-shell" id="app-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#inicio" aria-label="Ryds Stock, inicio">
+        <img src="assets/ryds-mark.webp" alt="">
+        <span><strong>Ryds Stock</strong><small>Panel de negocio</small></span>
+      </a>
+      <p class="nav-caption">MENÚ PRINCIPAL</p>
+      <nav class="side-nav" aria-label="Secciones">
+        <button class="nav-link active" data-view="dashboard"><span class="nav-icon">▦</span> Resumen</button>
+        <button class="nav-link" data-view="products"><span class="nav-icon">◫</span> Productos</button>
+        <button class="nav-link" data-view="sales"><span class="nav-icon">＄</span> Ventas</button>
+        <button class="nav-link" data-view="inventory"><span class="nav-icon">⇄</span> Movimientos</button>
+        <button class="nav-link" data-view="reports"><span class="nav-icon">▤</span> Informes</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="demo-callout"><span class="callout-dot"></span><span><strong id="account-role">Entorno demo</strong><small id="account-permissions">Información ficticia</small></span></div>
+        <button class="nav-link logout-button" id="logout-button"><span class="nav-icon">↪</span> Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="mobile-menu" aria-label="Abrir menú" aria-expanded="false">☰</button>
+        <div class="breadcrumb"><span>Ryds Stock</span><span class="breadcrumb-separator">/</span><strong id="page-title">Resumen</strong></div>
+        <div class="topbar-actions"><span class="status-pill"><span class="status-dot"></span> Demo conectada</span><span class="avatar" aria-label="Cuenta de demostración">R</span></div>
+      </header>
+
+      <main class="main-content" id="inicio">
+        <section class="view active" id="view-dashboard" aria-labelledby="dashboard-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">VISTA GENERAL</p><h1 id="dashboard-title">Resumen del negocio</h1><p class="page-subtitle">Un vistazo rápido a tus ventas e inventario.</p></div>
+            <button class="button button-primary" data-action="new-sale"><span aria-hidden="true">＋</span> Registrar venta</button>
+          </div>
+          <div class="metric-grid" id="metrics"></div>
+          <div class="dashboard-grid">
+            <section class="panel chart-panel">
+              <div class="panel-heading"><div><h2>Ventas recientes</h2><p>Ingresos de los últimos 7 días</p></div><span class="panel-icon">↗</span></div>
+              <div class="chart" id="sales-chart" aria-label="Gráfico de ingresos diarios"></div>
+            </section>
+            <section class="panel low-stock-panel">
+              <div class="panel-heading"><div><h2>Por reponer</h2><p>Productos en nivel mínimo o por debajo</p></div><button class="text-button" data-navigate="products">Ver todo →</button></div>
+              <div class="compact-list" id="low-stock-list"></div>
+            </section>
+            <section class="panel recent-panel">
+              <div class="panel-heading"><div><h2>Últimas ventas</h2><p>Actividad más reciente</p></div><button class="text-button" data-navigate="sales">Ver todas →</button></div>
+              <div class="table-wrap"><table><thead><tr><th>VENTA</th><th>CLIENTE</th><th>FECHA</th><th class="align-right">TOTAL</th></tr></thead><tbody id="recent-sales"></tbody></table></div>
+            </section>
+            <section class="panel top-products-panel">
+              <div class="panel-heading"><div><h2>Más vendidos</h2><p>Unidades vendidas, últimos 30 días</p></div><span class="panel-icon">★</span></div>
+              <div class="compact-list" id="top-products"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-products" aria-labelledby="products-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">CATÁLOGO</p><h1 id="products-title">Productos</h1><p class="page-subtitle">Administra precios, categorías y niveles de inventario.</p></div>
+            <button class="button button-primary" data-action="new-product" data-admin-only><span aria-hidden="true">＋</span> Añadir producto</button>
+          </div>
+          <section class="panel">
+            <div class="toolbar">
+              <label class="search-box"><span aria-hidden="true">⌕</span><input id="product-search" type="search" placeholder="Buscar nombre o SKU" autocomplete="off"></label>
+              <select id="category-filter" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select>
+              <select id="status-filter" aria-label="Filtrar por estado"><option value="all">Todos los estados</option><option value="active">Activos</option><option value="inactive">Archivados</option></select>
+              <button class="button button-secondary" data-action="stock-adjust" data-admin-only>⇄ Ajustar stock</button>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>PRODUCTO</th><th>SKU</th><th>CATEGORÍA</th><th class="align-right">COSTO</th><th class="align-right">PRECIO</th><th>EXISTENCIAS</th><th>ESTADO</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody id="products-table"></tbody></table></div>
+            <div class="table-footer" id="products-count"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-sales" aria-labelledby="sales-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">OPERACIONES</p><h1 id="sales-title">Ventas</h1><p class="page-subtitle">Registra ventas y consulta el historial.</p></div>
+            <button class="button button-primary" data-action="new-sale"><span aria-hidden="true">＋</span> Nueva venta</button>
+          </div>
+          <section class="panel">
+            <div class="toolbar sales-toolbar">
+              <label>Desde <input id="sales-from" type="date"></label>
+              <label>Hasta <input id="sales-to" type="date"></label>
+              <button class="button button-secondary" id="sales-filter">Aplicar filtros</button>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>REFERENCIA</th><th>CLIENTE</th><th>PRODUCTOS</th><th>FECHA</th><th class="align-right">TOTAL</th></tr></thead><tbody id="sales-table"></tbody></table></div>
+            <div class="table-footer" id="sales-count"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-inventory" aria-labelledby="inventory-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">TRAZABILIDAD</p><h1 id="inventory-title">Movimientos de inventario</h1><p class="page-subtitle">Entradas, ventas y ajustes con su motivo registrado.</p></div>
+            <button class="button button-primary" data-action="stock-adjust" data-admin-only><span aria-hidden="true">＋</span> Registrar movimiento</button>
+          </div>
+          <section class="panel">
+            <div class="panel-heading panel-heading-padded"><div><h2>Historial de movimientos</h2><p>Últimos 200 movimientos de stock</p></div></div>
+            <div class="table-wrap"><table><thead><tr><th>FECHA</th><th>PRODUCTO</th><th>MOVIMIENTO</th><th>MOTIVO</th><th>REFERENCIA</th></tr></thead><tbody id="movements-table"></tbody></table></div>
+            <div class="table-footer" id="movements-count"></div>
+          </section>
+        </section>
+
+        <section class="view" id="view-reports" aria-labelledby="reports-title">
+          <div class="page-heading">
+            <div><p class="eyebrow">ANÁLISIS</p><h1 id="reports-title">Informes</h1><p class="page-subtitle">Consulta ventas, utilidad bruta estimada y exporta el detalle.</p></div>
+            <button class="button button-secondary" id="export-csv">↓ Descargar CSV</button>
+          </div>
+          <section class="panel report-panel">
+            <div class="toolbar">
+              <label>Desde <input id="report-from" type="date"></label>
+              <label>Hasta <input id="report-to" type="date"></label>
+              <button class="button button-primary" id="report-filter">Generar informe</button>
+            </div>
+            <div class="report-metrics" id="report-metrics"></div>
+            <div class="table-wrap"><table><thead><tr><th>FECHA</th><th>CLIENTE</th><th>PRODUCTOS</th><th>NOTA</th><th class="align-right">UTILIDAD BRUTA</th><th class="align-right">TOTAL</th></tr></thead><tbody id="reports-table"></tbody></table></div>
+            <div class="table-footer" id="reports-count"></div>
+          </section>
+        </section>
+
+        <footer class="app-footer"><span>Ryds Stock · Aplicación de demostración</span><span>Datos ficticios · No usar para transacciones reales</span></footer>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="modal" id="product-modal">
+    <form id="product-form" class="modal-card">
+      <div class="modal-header"><div><p class="eyebrow">CATÁLOGO</p><h2 id="product-modal-title">Añadir producto</h2></div><button class="icon-button" type="button" data-close="product-modal" aria-label="Cerrar">×</button></div>
+      <input type="hidden" name="id">
+      <div class="form-grid">
+        <label class="form-span-2">Nombre del producto<input name="name" maxlength="100" required placeholder="Ej. Café molido 500 g"></label>
+        <label>SKU / Código<input name="sku" maxlength="40" required placeholder="CAF-500"></label>
+        <label>Categoría<input name="category" maxlength="60" list="category-options" required placeholder="Alimentos"><datalist id="category-options"></datalist></label>
+        <label>Costo unitario (USD)<input name="cost" type="number" min="0" max="99999999" step="0.01" required></label>
+        <label>Precio de venta (USD)<input name="price" type="number" min="0" max="99999999" step="0.01" required></label>
+        <label>Stock mínimo<input name="min_stock" type="number" min="0" max="100000" step="1" required></label>
+        <label id="initial-stock-field">Stock inicial<input name="stock" type="number" min="0" max="100000" step="1" value="0" required></label>
+        <label class="checkbox-label form-span-2"><input name="active" type="checkbox" checked> Producto activo y disponible para venta</label>
+      </div>
+      <p class="form-message" id="product-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button class="button button-secondary" type="button" data-close="product-modal">Cancelar</button><button class="button button-primary" type="submit" id="product-save">Guardar producto</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="sale-modal">
+    <form id="sale-form" class="modal-card wide-modal">
+      <div class="modal-header"><div><p class="eyebrow">NUEVA OPERACIÓN</p><h2>Registrar venta</h2></div><button class="icon-button" type="button" data-close="sale-modal" aria-label="Cerrar">×</button></div>
+      <div class="sale-layout">
+        <div>
+          <div class="sale-add-row">
+            <label>Producto<select id="sale-product" required></select></label>
+            <label>Cantidad<input id="sale-quantity" type="number" value="1" min="1" max="999"></label>
+            <button class="button button-secondary" id="add-to-cart" type="button">Añadir</button>
+          </div>
+          <div class="cart-list" id="cart-list"></div>
+        </div>
+        <div class="sale-details">
+          <label>Cliente (opcional)<input name="customer_name" maxlength="100" placeholder="Venta mostrador"></label>
+          <label>Nota (opcional)<textarea name="note" maxlength="240" rows="3" placeholder="Detalle para esta venta"></textarea></label>
+          <div class="sale-total"><span>Total</span><strong id="sale-total">$0.00</strong></div>
+        </div>
+      </div>
+      <p class="form-message" id="sale-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button class="button button-secondary" type="button" data-close="sale-modal">Cancelar</button><button class="button button-primary" type="submit" id="sale-submit" disabled>Confirmar venta</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="stock-modal">
+    <form id="stock-form" class="modal-card compact-modal">
+      <div class="modal-header"><div><p class="eyebrow">INVENTARIO</p><h2>Registrar movimiento</h2></div><button class="icon-button" type="button" data-close="stock-modal" aria-label="Cerrar">×</button></div>
+      <label>Producto<select name="product_id" id="stock-product" required></select></label>
+      <label>Tipo de movimiento<select name="type"><option value="entrada">Entrada de stock</option><option value="ajuste">Retirar unidades (ajuste)</option></select></label>
+      <label>Cantidad<input name="quantity" type="number" min="1" max="100000" required></label>
+      <label>Motivo<input name="reason" minlength="2" maxlength="120" required placeholder="Compra al proveedor, conteo físico..."></label>
+      <p class="form-message" id="stock-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button class="button button-secondary" type="button" data-close="stock-modal">Cancelar</button><button class="button button-primary" type="submit" id="stock-submit">Guardar movimiento</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
