@@ -5,6 +5,7 @@ Panel adaptable de demostración para inventario y ventas, construido con Cloudf
 ## Funcionalidades
 
 - Inicio de sesión con dos roles: administrador y vendedor.
+- Vista pública de demostración con acceso a las secciones y formularios, sin guardar cambios.
 - Catálogo de productos con búsqueda, filtros, edición y alertas de stock bajo.
 - Registro de ventas con validación de existencias y descuento automático de inventario.
 - Historial de movimientos de stock.
@@ -13,6 +14,8 @@ Panel adaptable de demostración para inventario y ventas, construido con Cloudf
 - Interfaz adaptable a escritorio y móvil.
 
 El vendedor puede consultar información y registrar ventas. Solo el administrador puede crear o editar productos y ajustar existencias. Los permisos se validan en la API, además de ocultar las acciones restringidas en la interfaz.
+
+En **Explorar demo sin guardar**, cualquier visitante puede recorrer el panel, filtros e informes y abrir formularios. Los botones para guardar quedan deshabilitados y la API solo permite lecturas públicas; las operaciones de escritura siguen requiriendo autenticación. La vista pública muestra los datos ficticios del proyecto: no guardes información real en la base de datos.
 
 ## Configuración local
 

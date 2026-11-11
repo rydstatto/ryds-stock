@@ -4,13 +4,14 @@ import {
   json,
   readJson,
   requireAuth,
+  requireReadAccess,
   validateDate,
   validateSale,
 } from "./_shared.js";
 
 export async function onRequestGet({ request, env }) {
   try {
-    requireAuth(request, env);
+    requireReadAccess(request, env);
     const url = new URL(request.url);
     const from = validateDate(url.searchParams.get("from"), "La fecha inicial");
     const to = validateDate(url.searchParams.get("to"), "La fecha final");

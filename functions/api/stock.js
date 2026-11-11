@@ -5,12 +5,13 @@ import {
   readJson,
   requireAuth,
   requireAdmin,
+  requireReadAccess,
   validateStockAdjustment,
 } from "./_shared.js";
 
 export async function onRequestGet({ request, env }) {
   try {
-    requireAuth(request, env);
+    requireReadAccess(request, env);
     const url = new URL(request.url);
     const requestedLimit = Number(url.searchParams.get("limit") || 50);
     const limit = Number.isSafeInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 200) : 50;

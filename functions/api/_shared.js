@@ -47,7 +47,12 @@ export function requireAuth(request, env) {
   const staffUsername = env.STAFF_USERNAME || "";
   const staffPassword = env.STAFF_PASSWORD || "";
   if (!adminUsername) throw new HttpError(503, "Falta configurar ADMIN_USERNAME.");
-  if (!adminPassword) throw new HttpError(503, "Falta configurar ADMIN_PASSWORD.");
+  if (typeof adminPassword !== "string") {
+    throw new HttpError(503, "Falta configurar ADMIN_PASSWORD.");
+  }
+  if (!adminPassword.length) {
+    throw new HttpError(503, "ADMIN_PASSWORD está configurada, pero vacía.");
+  }
   if (Boolean(staffUsername) !== Boolean(staffPassword)) {
     throw new HttpError(503, "La cuenta de vendedor no está configurada correctamente.");
   }
@@ -68,6 +73,11 @@ export function requireAuth(request, env) {
   if (adminMatch) return "admin";
   if (staffMatch) return "staff";
   throw new HttpError(401, "Usuario o contraseña incorrectos.");
+}
+
+export function requireReadAccess(request, env) {
+  if (!request.headers.get("Authorization")) return "demo";
+  return requireAuth(request, env);
 }
 
 export function requireAdmin(request, env) {

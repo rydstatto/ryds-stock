@@ -5,12 +5,13 @@ import {
   readJson,
   requireAuth,
   requireAdmin,
+  requireReadAccess,
   validateProduct,
 } from "./_shared.js";
 
 export async function onRequestGet({ request, env }) {
   try {
-    requireAuth(request, env);
+    requireReadAccess(request, env);
     const url = new URL(request.url);
     const search = (url.searchParams.get("q") || "").trim().slice(0, 100);
     const category = (url.searchParams.get("category") || "").trim().slice(0, 60);

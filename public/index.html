@@ -21,8 +21,9 @@
       <label for="login-password">Contraseña de demostración</label>
       <input id="login-password" name="password" type="password" autocomplete="current-password" required>
       <button class="button button-primary full-width" type="submit" id="login-button">Entrar al panel</button>
+      <button class="button button-secondary full-width" type="button" id="demo-button">Explorar demo sin guardar</button>
       <p class="form-message" id="login-message" role="status" aria-live="polite"></p>
-      <p class="demo-note">Este panel usa datos ficticios. No registres datos reales ni compartas credenciales.</p>
+      <p class="demo-note">Explora el panel y sus formularios. En el modo demo, los cambios no se guardan.</p>
     </form>
   </div>
 
@@ -161,6 +162,7 @@
         <label id="initial-stock-field">Stock inicial<input name="stock" type="number" min="0" max="100000" step="1" value="0" required></label>
         <label class="checkbox-label form-span-2"><input name="active" type="checkbox" checked> Producto activo y disponible para venta</label>
       </div>
+      <p class="form-message demo-readonly-notice" data-demo-only hidden>Modo demo: puedes explorar este formulario, pero los cambios no se guardan.</p>
       <p class="form-message" id="product-message" role="status" aria-live="polite"></p>
       <div class="modal-actions"><button class="button button-secondary" type="button" data-close="product-modal">Cancelar</button><button class="button button-primary" type="submit" id="product-save">Guardar producto</button></div>
     </form>
@@ -184,6 +186,7 @@
           <div class="sale-total"><span>Total</span><strong id="sale-total">$0.00</strong></div>
         </div>
       </div>
+      <p class="form-message demo-readonly-notice" data-demo-only hidden>Modo demo: puedes armar la venta, pero no se registra ni descuenta stock.</p>
       <p class="form-message" id="sale-message" role="status" aria-live="polite"></p>
       <div class="modal-actions"><button class="button button-secondary" type="button" data-close="sale-modal">Cancelar</button><button class="button button-primary" type="submit" id="sale-submit" disabled>Confirmar venta</button></div>
     </form>
@@ -196,6 +199,7 @@
       <label>Tipo de movimiento<select name="type"><option value="entrada">Entrada de stock</option><option value="ajuste">Retirar unidades (ajuste)</option></select></label>
       <label>Cantidad<input name="quantity" type="number" min="1" max="100000" required></label>
       <label>Motivo<input name="reason" minlength="2" maxlength="120" required placeholder="Compra al proveedor, conteo físico..."></label>
+      <p class="form-message demo-readonly-notice" data-demo-only hidden>Modo demo: puedes explorar este formulario, pero el inventario no cambia.</p>
       <p class="form-message" id="stock-message" role="status" aria-live="polite"></p>
       <div class="modal-actions"><button class="button button-secondary" type="button" data-close="stock-modal">Cancelar</button><button class="button button-primary" type="submit" id="stock-submit">Guardar movimiento</button></div>
     </form>

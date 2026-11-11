@@ -5,16 +5,21 @@ import {
   parseMoney,
   requireAdmin,
   requireAuth,
+  requireReadAccess,
   validateDate,
   validateProduct,
   validateSale,
   validateStockAdjustment,
 } from "../functions/api/_shared.js";
-import { onRequestPost as createProduct } from "../functions/api/products.js";
+import {
+  onRequestGet as listProducts,
+  onRequestPost as createProduct,
+} from "../functions/api/products.js";
 import {
   onRequestGet as listSales,
   onRequestPost as createSale,
 } from "../functions/api/sales.js";
+import { onRequestGet as checkAuth } from "../functions/api/auth.js";
 
 test("parseMoney converts valid amounts to integer cents", () => {
   assert.equal(parseMoney("12"), 1200);
@@ -110,6 +115,19 @@ test("basic authentication distinguishes admin and staff permissions", () => {
   );
 });
 
+test("admin login endpoint remains available alongside public demo access", async () => {
+  const credentials = btoa("admin:admin-password");
+  const response = await checkAuth({
+    request: new Request("https://example.test/api/auth", {
+      headers: { Authorization: `Basic ${credentials}` },
+    }),
+    env: { ADMIN_USERNAME: "admin", ADMIN_PASSWORD: "admin-password" },
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { authenticated: true, role: "admin" });
+});
+
 test("authentication reports incomplete account configuration", () => {
   const request = new Request("https://example.test/api/auth");
   assert.throws(
@@ -124,6 +142,58 @@ test("authentication reports incomplete account configuration", () => {
     () => requireAuth(request, { ADMIN_USERNAME: "admin" }),
     error => error instanceof HttpError && error.status === 503 && error.message === "Falta configurar ADMIN_PASSWORD.",
   );
+  assert.throws(
+    () => requireAuth(request, { ADMIN_USERNAME: "admin", ADMIN_PASSWORD: "" }),
+    error => error instanceof HttpError && error.status === 503 && error.message === "ADMIN_PASSWORD está configurada, pero vacía.",
+  );
+});
+
+test("public demo can read products without credentials", async () => {
+  const response = await listProducts({
+    request: new Request("https://example.test/api/products"),
+    env: {
+      DB: {
+        prepare() {
+          return {
+            bind() {
+              return this;
+            },
+            async all() {
+              return { results: [{ id: "product-1", name: "Café de prueba" }] };
+            },
+          };
+        },
+      },
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), [{ id: "product-1", name: "Café de prueba" }]);
+  assert.equal(requireReadAccess(new Request("https://example.test/api/products"), {}), "demo");
+});
+
+test("public demo cannot write sales without authentication", async () => {
+  const response = await createSale({
+    request: new Request("https://example.test/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: [{ product_id: "product-1", quantity: 1 }],
+      }),
+    }),
+    env: {
+      ADMIN_USERNAME: "admin",
+      ADMIN_PASSWORD: "admin-password",
+      DB: {
+        prepare() {
+          throw new Error("Una solicitud sin autenticar no debe acceder a la base de datos.");
+        },
+      },
+    },
+  });
+
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { detail: "Usuario o contraseña incorrectos." });
 });
 
 test("staff can read sales reports including estimated gross profit", async () => {

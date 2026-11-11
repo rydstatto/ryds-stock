@@ -1,8 +1,8 @@
-import { errorResponse, json, requireAuth } from "./_shared.js";
+import { errorResponse, json, requireReadAccess } from "./_shared.js";
 
 export async function onRequestGet({ request, env }) {
   try {
-    requireAuth(request, env);
+    requireReadAccess(request, env);
     const [inventory, sales, lowStock, recentSales, topProducts, dailySales, categories] = await Promise.all([
       env.DB.prepare(
         `SELECT COUNT(*) AS product_count,

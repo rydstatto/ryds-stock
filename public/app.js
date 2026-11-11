@@ -104,11 +104,7 @@ async function signIn(event) {
   try {
     const session = await api("/api/auth");
     state.role = session.role;
-    byId("account-role").textContent = state.role === "admin" ? "Administrador" : "Vendedor";
-    byId("account-permissions").textContent = state.role === "admin" ? "Acceso completo" : "Ventas y consultas";
-    document.querySelectorAll("[data-admin-only]").forEach(element => {
-      element.hidden = state.role !== "admin";
-    });
+    updateRoleInterface();
     byId("login-password").value = "";
     byId("login-screen").hidden = true;
     byId("app-shell").hidden = false;
@@ -122,10 +118,48 @@ async function signIn(event) {
   }
 }
 
+function startDemo() {
+  state.authorization = "";
+  state.role = "demo";
+  updateRoleInterface();
+  byId("login-screen").hidden = true;
+  byId("app-shell").hidden = false;
+  refreshAll();
+}
+
+function updateRoleInterface() {
+  const isDemo = state.role === "demo";
+  byId("account-role").textContent = state.role === "admin"
+    ? "Administrador"
+    : state.role === "staff"
+      ? "Vendedor"
+      : isDemo
+        ? "Vista de demostración"
+        : "Entorno demo";
+  byId("account-permissions").textContent = state.role === "admin"
+    ? "Acceso completo"
+    : state.role === "staff"
+      ? "Ventas y consultas"
+      : isDemo
+        ? "Exploración · sin cambios"
+        : "Información ficticia";
+  document.querySelectorAll("[data-admin-only]").forEach(element => {
+    element.hidden = state.role === "staff";
+  });
+  document.querySelectorAll("[data-demo-only]").forEach(element => {
+    element.hidden = !isDemo;
+  });
+  byId("product-save").disabled = isDemo;
+  byId("stock-submit").disabled = isDemo;
+  byId("sale-submit").disabled = isDemo || state.cart.size === 0;
+}
+
 function signOut() {
   state.authorization = "";
+  state.role = "";
   state.products = [];
   state.cart.clear();
+  updateRoleInterface();
   byId("app-shell").hidden = true;
   byId("login-screen").hidden = false;
   byId("login-password").value = "";
@@ -256,7 +290,7 @@ function renderProducts() {
     <td class="align-right"><strong>${money(product.price_cents)}</strong></td>
     <td>${product.stock} uds. <span style="color:#637a91">/ mín. ${product.min_stock}</span></td>
     <td>${productStockBadge(product)}</td>
-    <td>${state.role === "admin" ? `<button class="row-action" data-edit-product="${escapeHtml(product.id)}">Editar</button>` : ""}</td></tr>`).join("") :
+    <td>${state.role === "admin" || state.role === "demo" ? `<button class="row-action" data-edit-product="${escapeHtml(product.id)}">Editar</button>` : ""}</td></tr>`).join("") :
     '<tr><td colspan="8" class="empty-state">No se encontraron productos.</td></tr>';
   byId("products-count").textContent = `${filtered.length} de ${state.products.length} productos`;
   const categories = [...new Set(state.products.map(product => product.category))].sort((a, b) => a.localeCompare(b, "es"));
@@ -278,7 +312,7 @@ function renderProductOptions() {
 }
 
 async function loadSales() {
-  if (!state.authorization) return;
+  if (!state.role) return;
   const from = byId("sales-from").value;
   const to = byId("sales-to").value;
   const query = new URLSearchParams({ limit: "200" });
@@ -303,7 +337,7 @@ function renderSales() {
 }
 
 async function loadMovements() {
-  if (!state.authorization) return;
+  if (!state.role) return;
   try {
     state.movements = await api("/api/stock?limit=200");
     byId("movements-table").innerHTML = state.movements.length ? state.movements.map(item => `
@@ -318,7 +352,7 @@ async function loadMovements() {
 }
 
 async function loadReport() {
-  if (!state.authorization) return;
+  if (!state.role) return;
   const query = new URLSearchParams({ limit: "2000" });
   if (byId("report-from").value) query.set("from", byId("report-from").value);
   if (byId("report-to").value) query.set("to", byId("report-to").value);
@@ -383,11 +417,15 @@ function renderCart() {
     </div>`).join("") : '<div class="empty-state">Añade productos para crear la venta.</div>';
   const total = items.reduce((sum, item) => sum + item.quantity * item.price_cents, 0);
   byId("sale-total").textContent = money(total);
-  byId("sale-submit").disabled = items.length === 0;
+  byId("sale-submit").disabled = items.length === 0 || state.role === "demo";
 }
 
 async function submitProduct(event) {
   event.preventDefault();
+  if (state.role === "demo") {
+    showMessage("product-message", "Modo demo: los cambios no se guardan.");
+    return;
+  }
   const form = event.currentTarget;
   const id = form.elements.id.value;
   const payload = {
@@ -420,6 +458,10 @@ async function submitProduct(event) {
 
 async function submitSale(event) {
   event.preventDefault();
+  if (state.role === "demo") {
+    showMessage("sale-message", "Modo demo: la venta no se registra.");
+    return;
+  }
   const items = [...state.cart.values()].map(item => ({ product_id: item.id, quantity: item.quantity }));
   const form = event.currentTarget;
   const button = byId("sale-submit");
@@ -444,6 +486,10 @@ async function submitSale(event) {
 
 async function submitStock(event) {
   event.preventDefault();
+  if (state.role === "demo") {
+    showMessage("stock-message", "Modo demo: el inventario no cambia.");
+    return;
+  }
   const form = event.currentTarget;
   const payload = Object.fromEntries(new FormData(form));
   payload.quantity = Number(payload.quantity);
@@ -528,6 +574,7 @@ document.addEventListener("click", event => {
 });
 
 byId("login-form").addEventListener("submit", signIn);
+byId("demo-button").addEventListener("click", startDemo);
 byId("logout-button").addEventListener("click", signOut);
 byId("product-form").addEventListener("submit", submitProduct);
 byId("sale-form").addEventListener("submit", submitSale);

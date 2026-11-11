@@ -39,6 +39,7 @@ button { cursor: pointer; }
 .login-card label, .modal-card label, .toolbar label { display: grid; gap: 8px; color: #c8d4e0; font-size: 13px; font-weight: 600; }
 .login-card label + input { margin-top: 8px; }
 .login-card input { margin-bottom: 18px; }
+.login-card #demo-button { margin-top: 10px; }
 .demo-note { margin: 18px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.6; text-align: center; }
 
 input, select, textarea { width: 100%; color: var(--text); background: #091726; border: 1px solid #263d52; border-radius: 9px; padding: 11px 12px; outline: none; transition: border-color .16s, box-shadow .16s, background .16s; }
@@ -62,6 +63,7 @@ textarea { resize: vertical; }
 .icon-button { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; color: #aec0d1; background: transparent; border: 1px solid transparent; border-radius: 9px; font-size: 20px; }
 .icon-button:hover { background: var(--surface-hover); border-color: var(--line); }
 .form-message { min-height: 18px; margin: 10px 0 0; color: var(--red); font-size: 12px; line-height: 1.5; }
+.demo-readonly-notice { padding: 9px 11px; color: var(--accent); background: rgba(85, 211, 183, .08); border: 1px solid rgba(85, 211, 183, .2); border-radius: 8px; }
 
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; display: flex; flex-direction: column; width: 246px; padding: 23px 15px 16px; background: #091726; border-right: 1px solid #192e42; }
